@@ -142,10 +142,10 @@ Open your browser to [http://localhost:8080](http://localhost:8080)
 > Insert your UI screenshots here
 markdown
 
-```bash
+
 ![Home Page](./images/image2.png)
-![MetaMask Prompt](./images/image3.png)git
-```
+![MetaMask Prompt](./images/image3.png)
+
 
 ---
 
