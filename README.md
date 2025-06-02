@@ -19,7 +19,7 @@ Built with:
 
 ## 🚀 Preview
 
-![DApp Preview](./dapp-preview.png)
+![DApp Preview](./images/image1.png)
 
 > Replace the image file `dapp-preview.png` with a screenshot of your app.
 
@@ -122,7 +122,7 @@ Open your browser to [http://localhost:8080](http://localhost:8080)
 2. Import Ganache account using mnemonic/private key
 3. Add a custom network:
    - Network Name: Ganache
-   - RPC URL: http://127.0.0.1:8545
+   - RPC URL: http://127.0.0.1:7545
    - Chain ID: 1337
 4. Connect wallet from the DApp interface
 
@@ -140,11 +140,12 @@ Open your browser to [http://localhost:8080](http://localhost:8080)
 ## 📷 Screenshots
 
 > Insert your UI screenshots here
+markdown
 
-\`\`\`markdown
-![Home Page](./screenshots/home.png)
-![MetaMask Prompt](./screenshots/metamask.png)
-\`\`\`
+```bash
+![Home Page](./images/image2.png)
+![MetaMask Prompt](./images/image3.png)git
+```
 
 ---
 
