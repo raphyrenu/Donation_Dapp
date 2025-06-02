@@ -1,0 +1,39 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Truffle build artifacts
+build/
+truffle-config.js~
+
+# Hardhat artifacts
+artifacts/
+cache/
+typechain/
+coverage/
+
+# .env for private keys, API keys, secrets
+.env
+.env.*
+
+# IDE/editor files
+.vscode/
+.idea/
+.DS_Store
+
+# OS files
+Thumbs.db
+*.swp
+
+# Logs
+*.log
+
+# Webpack/Parcel
+dist/
+
+# Contracts to exclude (optional)
+*.abi.json
