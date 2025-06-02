@@ -23,11 +23,15 @@ Built with:
 
 > Replace the image file `dapp-preview.png` with a screenshot of your app.
 
+# 🎓 Decentralized Scholarship Funding (Donation DApp)
+
+A simple decentralized application (DApp) that allows donors to fund scholarships and students to apply for financial support. Built using Solidity, Truffle, and Web3.js.
+
 ---
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 donation-dapp/
 │
 ├── contracts/
@@ -43,7 +47,7 @@ donation-dapp/
 ├── build/               # Auto-generated after compile
 ├── truffle-config.js
 └── README.md
-\`\`\`
+```
 
 ---
 
@@ -51,52 +55,62 @@ donation-dapp/
 
 ### 1. Install Dependencies
 
-Install Truffle and Ganache globally:
+Install global dependencies:
 
-\`\`\`bash
+```bash
 npm install -g truffle
 npm install -g ganache-cli
 npm install -g http-server
-\`\`\`
+```
 
 Initialize local project dependencies:
 
-\`\`\`bash
+```bash
 cd donation-dapp
 npm init -y
 npm install web3
-\`\`\`
+```
 
 ---
 
 ### 2. Start Ganache
 
-\`\`\`bash
+Start your local blockchain environment:
+
+```bash
 ganache-cli
-\`\`\`
+```
+
+Leave this terminal running while testing your DApp.
 
 ---
 
-### 3. Compile & Deploy Contract
+### 3. Compile & Deploy Smart Contract
 
-\`\`\`bash
+In a separate terminal:
+
+```bash
 truffle compile
 truffle migrate --reset
-\`\`\`
+```
 
-Copy the deployed contract address and paste it into \`client/web3.js\`:
-\`\`\`js
+After migration, copy the **deployed contract address** and update this line in `client/web3.js`:
+
+```js
 const contractAddress = "PASTE_HERE";
-\`\`\`
+```
 
 ---
 
 ### 4. Serve the Frontend
 
-\`\`\`bash
+Navigate to the `client` directory and run a local web server:
+
+```bash
 cd client
 npx http-server
-\`\`\`
+```
+---
 
 Open your browser to [http://localhost:8080](http://localhost:8080)
 
@@ -154,4 +168,3 @@ Fullstack Developer & Cybersecurity Engineer
 - [Web3.js Docs](https://web3js.readthedocs.io/)
 - [Ganache](https://trufflesuite.com/ganache/)
 - [MetaMask](https://metamask.io/)
-
