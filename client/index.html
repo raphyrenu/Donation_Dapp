@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scholarship Funding Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 30px 25px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .logo-subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .nav-menu {
+      padding: 20px 0;
+    }
+
+    .nav-item {
+      padding: 15px 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-left: 4px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1);
+      border-left-color: #fff;
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.15);
+      border-left-color: #fff;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 280px;
+      padding: 0;
+    }
+
+    .header {
+      background: white;
+      padding: 20px 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #1e293b;
+    }
+
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .wallet-status {
+      padding: 10px 20px;
+      background: #10b981;
+      color: white;
+      border-radius: 25px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wallet-status.disconnected {
+      background: #ef4444;
+    }
+
+    .connect-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+
+    .connect-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .content-area {
+      padding: 30px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+    }
+
+    .card h3 {
+      margin-bottom: 20px;
+      color: #1e293b;
+      font-size: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .output {
+      background: #f1f5f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .application-item {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .application-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .status-approved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .transaction-history {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .transaction-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background: #10b981;
+    }
+
+    .notification.error {
+      background: #ef4444;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-graduation-cap"></i> EduFund
+        </div>
+        <div class="logo-subtitle">Decentralized Scholarship Platform</div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-item active" onclick="showSection('overview')">
+          <i class="fas fa-chart-line"></i>
+          <span>Overview</span>
+        </div>
+        <div class="nav-item" onclick="showSection('donate')">
+          <i class="fas fa-heart"></i>
+          <span>Make Donation</span>
+        </div>
+        <div class="nav-item" onclick="showSection('apply')">
+          <i class="fas fa-file-alt"></i>
+          <span>Apply for Scholarship</span>
+        </div>
+        <div class="nav-item" onclick="showSection('applications')">
+          <i class="fas fa-users"></i>
+          <span>Manage Applications</span>
+        </div>
+        <div class="nav-item" onclick="showSection('transactions')">
+          <i class="fas fa-history"></i>
+          <span>Transaction History</span>
+        </div>
+        <div class="nav-item" onclick="showSection('analytics')">
+          <i class="fas fa-analytics"></i>
+          <span>Analytics</span>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="header">
+        <h1>Dashboard</h1>
+        <div class="wallet-info">
+          <div id="walletStatus" class="wallet-status disconnected">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet Disconnected</span>
+          </div>
+          <button class="connect-btn" onclick="connectWallet()">
+            <i class="fas fa-plug"></i>
+            Connect Wallet
+          </button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                <i class="fas fa-coins"></i>
+              </div>
+              <div class="stat-value" id="totalDonationsDisplay">0</div>
+              <div class="stat-label">Total Donations (ETH)</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-value" id="totalApplicants">0</div>
+              <div class="stat-label">Total Applicants</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                <i class="fas fa-gift"></i>
+              </div>
+              <div class="stat-value" id="fundsDistributed">0</div>
+              <div class="stat-label">Funds Distributed (ETH)</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                <i class="fas fa-percentage"></i>
+              </div>
+              <div class="stat-value" id="successRate">0%</div>
+              <div class="stat-label">Success Rate</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><i class="fas fa-chart-bar"></i> Recent Activity</h3>
+            <div id="recentActivity">
+              <p style="color: #64748b; text-align: center; padding: 40px;">Connect your wallet to view recent activity</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Donate Section -->
+        <section id="donate" class="section">
+          <div class="card">
+            <h3><i class="fas fa-heart"></i> Make a Donation</h3>
+            <p style="margin-bottom: 20px; color: #64748b;">Support students by contributing to the scholarship fund. Your donation will help deserving students achieve their educational goals.</p>
+
+            <div class="form-group">
+              <label for="donationAmount">Donation Amount (ETH)</label>
+              <input type="number" id="donationAmount" class="form-input" placeholder="Enter amount in ETH" step="0.001" min="0.001">
+            </div>
+
+            <button class="btn" onclick="donate()">
+              <i class="fas fa-heart"></i>
+              Donate Now
+            </button>
+          </div>
+
+          <div class="card">
+            <h3><i class="fas fa-history"></i> Your Donation History</h3>
+            <button class="btn btn-secondary" onclick="getUserDonations()">
+              <i class="fas fa-refresh"></i>
+              Refresh History
+            </button>
+            <div class="output" id="userDonations">
+              Connect your wallet and click refresh to view your donation history
+            </div>
+          </div>
+        </section>
+
+        <!-- Apply Section -->
+        <section id="apply" class="section">
+          <div class="card">
+            <h3><i class="fas fa-file-alt"></i> Apply for Scholarship</h3>
+            <p style="margin-bottom: 20px; color: #64748b;">Submit your application for scholarship consideration. Make sure you meet all eligibility criteria before applying.</p>
+
+            <div class="form-group">
+              <label for="applicantName">Full Name</label>
+              <input type="text" id="applicantName" class="form-input" placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+              <label for="applicantEmail">Email Address</label>
+              <input type="email" id="applicantEmail" class="form-input" placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+              <label for="studyField">Field of Study</label>
+              <input type="text" id="studyField" class="form-input" placeholder="e.g., Computer Science, Medicine">
+            </div>
+
+            <div class="form-group">
+              <label for="applicationReason">Why do you deserve this scholarship?</label>
+              <textarea id="applicationReason" class="form-input" rows="4" placeholder="Explain your situation and goals..."></textarea>
+            </div>
+
+            <button class="btn" onclick="applyForScholarship()">
+              <i class="fas fa-paper-plane"></i>
+              Submit Application
+            </button>
+          </div>
+        </section>
+
+        <!-- Applications Management Section -->
+        <section id="applications" class="section">
+          <div class="card">
+            <h3><i class="fas fa-users"></i> Manage Applications</h3>
+            <p style="margin-bottom: 20px; color: #64748b;">Review and manage scholarship applications. Only administrators can access this section.</p>
+
+            <div class="form-group">
+              <label for="recipientAddress">Recipient Wallet Address</label>
+              <input type="text" id="recipientAddress" class="form-input" placeholder="0x...">
+            </div>
+
+            <div class="form-group">
+              <label for="releaseAmount">Amount to Release (ETH)</label>
+              <input type="number" id="releaseAmount" class="form-input" placeholder="Enter amount" step="0.001" min="0.001" value="1">
+            </div>
+
+            <button class="btn btn-success" onclick="releaseFunds()">
+              <i class="fas fa-check"></i>
+              Release Funds
+            </button>
+          </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions" class="section">
+          <div class="card">
+            <h3><i class="fas fa-history"></i> Transaction History</h3>
+            <button class="btn btn-secondary" onclick="loadTransactionHistory()">
+              <i class="fas fa-refresh"></i>
+              Refresh History
+            </button>
+
+            <div class="transaction-history" id="transactionHistory">
+              <p style="color: #64748b; text-align: center; padding: 40px;">No transactions found. Connect your wallet to view history.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics" class="section">
+          <div class="card">
+            <h3><i class="fas fa-chart-line"></i> Platform Analytics</h3>
+            <button class="btn btn-secondary" onclick="refreshAnalytics()">
+              <i class="fas fa-refresh"></i>
+              Refresh Data
+            </button>
+
+            <div class="stats-grid" style="margin-top: 20px;">
+              <div class="stat-card">
+                <div class="stat-icon" style="background: #3b82f6; color: white;">
+                  <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-value" id="contractBalance">0</div>
+                <div class="stat-label">Contract Balance (ETH)</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon" style="background: #10b981; color: white;">
+                  <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="stat-value" id="totalDeposits">0</div>
+                <div class="stat-label">Total Deposits</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+
+  <script>
+    const contractAddress = "0xc204F5eBFeb305bA3AEd7699dFeDDaDbeAcaE627";
+    const contractABI = [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "applicant",
+            "type": "address"
+          }
+        ],
+        "name": "Applied",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "donor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "Donated",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "FundsReleased",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "admin",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "applicants",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalDonations",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "donate",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "applyForScholarship",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address payable",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "releaseFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    let web3;
+    let contract;
+    let accounts;
+
+    // Navigation
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // Remove active class from nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+
+      // Add active class to clicked nav item
+      event.target.closest('.nav-item').classList.add('active');
+    }
+
+    // Notification system
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 4000);
+    }
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          web3 = new Web3(window.ethereum);
+          accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+          contract = new web3.eth.Contract(contractABI, contractAddress);
+
+          // Update UI
+          const walletStatus = document.getElementById('walletStatus');
+          walletStatus.className = 'wallet-status';
+          walletStatus.innerHTML = `<i class="fas fa-wallet"></i><span>${accounts[0].substring(0, 6)}...${accounts[0].substring(38)}</span>`;
+
+          showNotification('Wallet connected successfully!');
+
+          // Load initial data
+          await loadDashboardData();
+
+        } catch (error) {
+          showNotification('Failed to connect wallet: ' + error.message, 'error');
+        }
+      } else {
+        showNotification('Please install MetaMask to use this application!', 'error');
+      }
+    }
+
+    async function loadDashboardData() {
+      try {
+        // Load total donations
+        const totalDonations = await contract.methods.totalDonations().call();
+        const totalEth = web3.utils.fromWei(totalDonations, "ether");
+        document.getElementById('totalDonationsDisplay').textContent = parseFloat(totalEth).toFixed(4);
+
+        // Load contract balance
+        const balance = await contract.methods.getBalance().call();
+        const balanceEth = web3.utils.fromWei(balance, "ether");
+        document.getElementById('contractBalance').textContent = parseFloat(balanceEth).toFixed(4);
+
+        // Load user donations
+        await getUserDonations();
+
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
+    }
+
+    async function donate() {
+      const amount = document.getElementById("donationAmount").value;
+      if (!amount || amount <= 0) {
+        showNotification("Please enter a valid donation amount", 'error');
+        return;
+      }
+
+      if (!contract) {
+        showNotification("Please connect your wallet first", 'error');
+        return;
+      }
+
+      try {
+        await contract.methods.donate().send({
+          from: accounts[0],
+          value: web3.utils.toWei(amount, "ether")
+        });
+
+        showNotification(`Successfully donated ${amount} ETH!`);
+        document.getElementById("donationAmount").value = '';
+        await loadDashboardData();
+
+      } catch (err) {
+        showNotification("Donation failed: " + err.message, 'error');
+      }
+    }
+
+    async function applyForScholarship() {
+      if (!contract) {
+        showNotification("Please connect your wallet first", 'error');
+        return;
+      }
+
+      const name = document.getElementById("applicantName").value;
+      const email = document.getElementById("applicantEmail").value;
+      const field = document.getElementById("studyField").value;
+      const reason = document.getElementById("applicationReason").value;
+
+      if (!name || !email || !field || !reason) {
+        showNotification("Please fill in all application fields", 'error');
+        return;
+      }
+
+      try {
+        await contract.methods.applyForScholarship().send({ from: accounts[0] });
+        showNotification("Application submitted successfully!");
+
+        // Clear form
+        document.getElementById("applicantName").value = '';
+        document.getElementById("applicantEmail").value = '';
+        document.getElementById("studyField").value = '';
+        document.getElementById("applicationReason").value = '';
+
+      } catch (err) {
+        showNotification("Application failed: " + err.message, 'error');
+      }
+    }
+
+    async function releaseFunds() {
+      const recipient = document.getElementById("recipientAddress").value;
+      const amount = document.getElementById("releaseAmount").value;
+
+      if (!recipient || !amount) {
+        showNotification("Please enter recipient address and amount", 'error');
+        return;
+      }
+
+      if (!contract) {
+        showNotification("Please connect your wallet first", 'error');
+        return;
+      }
+
+      try {
+        const amountWei = web3.utils.toWei(amount, 'ether');
+        await contract.methods.releaseFunds(recipient, amountWei).send({ from: accounts[0] });
+        showNotification(`Successfully released ${amount} ETH to recipient!`);
+
+        document.getElementById("recipientAddress").value = '';
+        await loadDashboardData();
+
+      } catch (err) {
+        showNotification("Fund release failed: " + err.message, 'error');
+      }
+    }
+
+    async function getUserDonations() {
+      if (!contract || !accounts) {
+        document.getElementById("userDonations").innerHTML = "Please connect your wallet to view donation history";
+        return;
+      }
+
+      try {
+        const events = await contract.getPastEvents('Donated', {
+          filter: { donor: accounts[0] },
+          fromBlock: 0,
+          toBlock: 'latest'
+        });
+
+        if (events.length === 0) {
+          document.getElementById("userDonations").innerHTML = "You have not made any donations yet.";
+        } else {
+          let total = events.reduce((acc, e) => acc + Number(e.returnValues.amount), 0);
+          const eth = web3.utils.fromWei(total.toString(), "ether");
+          document.getElementById("userDonations").innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>Total Donated:</strong> ${parseFloat(eth).toFixed(4)} ETH
+              </div>
+              <div>
+                <strong>Number of Donations:</strong> ${events.length}
+              </div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        showNotification("Failed to fetch donation history: " + err.message, 'error');
+      }
+    }
+
+
+    async function loadTransactionHistory() {
+      if (!contract || !accounts) {
+        document.getElementById("transactionHistory").innerHTML = "Please connect your wallet to view transaction history";
+        return;
+      }
+
+      try {
+        const events = await contract.getPastEvents('FundsReleased', {
+          filter: { recipient: accounts[0] },
+          fromBlock: 0,
+          toBlock: 'latest'
+        });
+
+        if (events.length === 0) {
+          document.getElementById("transactionHistory").innerHTML = "No transactions found.";
+        } else {
+          const historyHtml = events.map(event => `
+            <div class="transaction-item">
+              <span>${new Date(event.returnValues.timestamp * 1000).toLocaleString()}</span>
+              <span>${event.returnValues.amount} ETH to ${event.returnValues.recipient}</span>
+            </div>
+          `).join('');
+          document.getElementById("transactionHistory").innerHTML = historyHtml;
+        }
+      } catch (err) {
+        showNotification("Failed to fetch transaction history: " + err.message, 'error');
+      }
+    }
+
+    </script>
+
+    </body/>
+</html>
