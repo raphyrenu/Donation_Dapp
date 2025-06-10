@@ -3,7 +3,7 @@
 
 A fully functional decentralized application (DApp) built on the Ethereum blockchain that allows users to:
 
-- 💰 Donate ETH to a scholarship fund
+- 💰 Donate ETH(Ether) to a scholarship fund
 - 📄 Apply for scholarships
 - 🔐 Allow the admin to release funds to applicants
 
